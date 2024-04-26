@@ -1,0 +1,126 @@
+<html>
+<head>
+<script>window.onload = () => {
+
+isbuilding = false
+walls = []
+memory = []
+
+x=0
+y=0
+gotox=0
+gotoy=0
+playerx=0
+playery=0
+
+player = document.createElement("div")
+player.style.position = "absolute"
+player.style.backgroundColor = "black"
+player.style.width = "40px"
+player.style.height = "40px"
+player.style.left = "0px"
+player.style.top = "0px"
+document.body.appendChild(player)
+
+square = document.createElement("div")
+square.style.position = "absolute"
+square.style.backgroundColor = "green"
+square.opacity=".5"
+square.style.width = "40px"
+square.style.height = "40px"
+square.style.left = x-x%40 + "px"
+square.style.top = y-y%40 + "px"
+document.body.appendChild(square)
+
+
+document.addEventListener("keydown", (event) => {
+	if(event.key == "b") {
+		isbuilding = !isbuilding
+	}
+})
+document.addEventListener("mousemove", (event) => {
+	x = event.x
+	y = event.y
+	square.style.left = x-x%40 + "px"
+	square.style.top = y-y%40 + "px"
+})
+document.addEventListener("mousedown",(event) => {
+	if(!isbuilding) {
+		gotox = x-x%40
+		gotoy = y-y%40
+		square.style.opacity = 1
+		memory = []
+	} else {
+		walls.unshift([x-x%40,y-y%40])
+		wall = document.createElement("div")
+		wall.style.position = "absolute"
+		wall.style.backgroundColor = "red"
+		wall.style.width = "40px"
+		wall.style.height = "40px"
+		wall.style.left = walls[0][0] + "px"
+		wall.style.top = walls[0][1] + "px"
+		document.body.appendChild(wall)
+	}
+})
+document.addEventListener("mouseup",(event) => {
+	square.style.opacity = .5
+})
+
+setInterval(()=>{
+	direction = [0,0]
+	if(gotox-playerx==0 && gotoy-playery==0) {
+		//do nothing
+	} else if(Math.abs(gotox-playerx)>=Math.abs(gotoy-playery)) {
+		direction[0] = 1-2*(gotox<playerx)
+	} else {
+		direction[1] = 1-2*(gotoy<playery)
+	}
+	possiblespots = []
+	contains = true
+	checked = 0
+	while(contains && checked<4) {
+		contains = false
+		for(let i = 0;i<walls.length;i++) {
+			if(playerx+direction[0]*40==walls[i][0] &&playery+direction[1]*40==walls[i][1]) {
+				contains=true
+			}
+		}
+		for(let i = 0;i<memory.length;i++) {
+			if(playerx+direction[0]*40==memory[i][0] &&playery+direction[1]*40==memory[i][1]) {
+				contains=true
+				possiblespots.push(memory[i])
+			}
+		}
+		if(contains) {
+			direction = [-direction[1],direction[0]]
+		}
+		checked++
+	}
+	if(direction[0]+direction[1]==0) {
+		//do nothing
+	} else if(contains) {
+		console.log(possiblespots)
+		if(possiblespots.length == 0) {
+			gotox = playerx
+			gotoy = playery
+			direction = [0,0]
+		} else {
+			i = Math.floor(Math.random()*(possiblespots.length))
+			playerx =possiblespots[i][0]
+			playery =possiblespots[i][1]
+			player.style.left = playerx+"px"
+			player.style.top = playery+"px"
+		}
+	} else {
+		playerx += direction[0]*40
+		playery += direction[1]*40
+		player.style.left = playerx+"px"
+		player.style.top = playery+"px"
+		memory.push([playerx,playery])
+	}
+},1000/4)
+}</script>
+</head>
+<body>
+</body>
+</html>
